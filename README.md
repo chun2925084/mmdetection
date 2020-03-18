@@ -24,7 +24,7 @@ python setup.py install
 
 ### Train
 
-Remember to change the path in config file you use in  the config you need in config/ 
+Remember to change the path in config file in config/ 
 
 Single GPU
 
