@@ -4,7 +4,6 @@ import mmcv
 import numpy as np
 from torch.utils.data import Dataset
 
-from mmdet.core import eval_map, eval_recalls
 from .pipelines import Compose
 from .registry import DATASETS
 
@@ -41,15 +40,13 @@ class CustomDataset(Dataset):
                  img_prefix='',
                  seg_prefix=None,
                  proposal_file=None,
-                 test_mode=False,
-                 filter_empty_gt=True):
+                 test_mode=False):
         self.ann_file = ann_file
         self.data_root = data_root
         self.img_prefix = img_prefix
         self.seg_prefix = seg_prefix
         self.proposal_file = proposal_file
         self.test_mode = test_mode
-        self.filter_empty_gt = filter_empty_gt
 
         # join paths if data_root is specified
         if self.data_root is not None:
@@ -69,7 +66,7 @@ class CustomDataset(Dataset):
             self.proposals = self.load_proposals(self.proposal_file)
         else:
             self.proposals = None
-        # filter images too small
+        # filter images with no annotation during training
         if not test_mode:
             valid_inds = self._filter_imgs()
             self.img_infos = [self.img_infos[i] for i in valid_inds]
@@ -99,7 +96,6 @@ class CustomDataset(Dataset):
         results['proposal_file'] = self.proposal_file
         results['bbox_fields'] = []
         results['mask_fields'] = []
-        results['seg_fields'] = []
 
     def _filter_imgs(self, min_size=32):
         """Filter images too small."""
@@ -151,63 +147,3 @@ class CustomDataset(Dataset):
             results['proposals'] = self.proposals[idx]
         self.pre_pipeline(results)
         return self.pipeline(results)
-
-    def format_results(self, results, **kwargs):
-        pass
-
-    def evaluate(self,
-                 results,
-                 metric='mAP',
-                 logger=None,
-                 proposal_nums=(100, 300, 1000),
-                 iou_thr=0.5,
-                 scale_ranges=None):
-        """Evaluate the dataset.
-
-        Args:
-            results (list): Testing results of the dataset.
-            metric (str | list[str]): Metrics to be evaluated.
-            logger (logging.Logger | None | str): Logger used for printing
-                related information during evaluation. Default: None.
-            proposal_nums (Sequence[int]): Proposal number used for evaluating
-                recalls, such as recall@100, recall@1000.
-                Default: (100, 300, 1000).
-            iou_thr (float | list[float]): IoU threshold. It must be a float
-                when evaluating mAP, and can be a list when evaluating recall.
-                Default: 0.5.
-            scale_ranges (list[tuple] | None): Scale ranges for evaluating mAP.
-                Default: None.
-        """
-        if not isinstance(metric, str):
-            assert len(metric) == 1
-            metric = metric[0]
-        allowed_metrics = ['mAP', 'recall']
-        if metric not in allowed_metrics:
-            raise KeyError('metric {} is not supported'.format(metric))
-        annotations = [self.get_ann_info(i) for i in range(len(self))]
-        eval_results = {}
-        if metric == 'mAP':
-            assert isinstance(iou_thr, float)
-            mean_ap, _ = eval_map(
-                results,
-                annotations,
-                scale_ranges=scale_ranges,
-                iou_thr=iou_thr,
-                dataset=self.CLASSES,
-                logger=logger)
-            eval_results['mAP'] = mean_ap
-        elif metric == 'recall':
-            gt_bboxes = [ann['bboxes'] for ann in annotations]
-            if isinstance(iou_thr, float):
-                iou_thr = [iou_thr]
-            recalls = eval_recalls(
-                gt_bboxes, results, proposal_nums, iou_thr, logger=logger)
-            for i, num in enumerate(proposal_nums):
-                for j, iou in enumerate(iou_thr):
-                    eval_results['recall@{}@{}'.format(num, iou)] = recalls[i,
-                                                                            j]
-            if recalls.shape[1] > 1:
-                ar = recalls.mean(axis=1)
-                for i, num in enumerate(proposal_nums):
-                    eval_results['AR@{}'.format(num)] = ar[i]
-        return eval_results

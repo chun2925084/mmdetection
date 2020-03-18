@@ -1,10 +1,11 @@
+import logging
+
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from mmcv.cnn import VGG, constant_init, kaiming_init, normal_init, xavier_init
 from mmcv.runner import load_checkpoint
 
-from mmdet.utils import get_root_logger
 from ..registry import BACKBONES
 
 
@@ -74,7 +75,7 @@ class SSDVGG(VGG):
 
     def init_weights(self, pretrained=None):
         if isinstance(pretrained, str):
-            logger = get_root_logger()
+            logger = logging.getLogger()
             load_checkpoint(self, pretrained, strict=False, logger=logger)
         elif pretrained is None:
             for m in self.features.modules():

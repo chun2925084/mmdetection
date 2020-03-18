@@ -8,7 +8,7 @@ from .registry import DATASETS
 def _concat_dataset(cfg, default_args=None):
     ann_files = cfg['ann_file']
     img_prefixes = cfg.get('img_prefix', None)
-    seg_prefixes = cfg.get('seg_prefix', None)
+    seg_prefixes = cfg.get('seg_prefixes', None)
     proposal_files = cfg.get('proposal_file', None)
 
     datasets = []
@@ -33,9 +33,9 @@ def build_dataset(cfg, default_args=None):
     elif cfg['type'] == 'RepeatDataset':
         dataset = RepeatDataset(
             build_dataset(cfg['dataset'], default_args), cfg['times'])
-    elif isinstance(cfg.get('ann_file'), (list, tuple)):
+    elif isinstance(cfg['ann_file'], (list, tuple)):
         dataset = _concat_dataset(cfg, default_args)
     else:
         dataset = build_from_cfg(cfg, DATASETS, default_args)
-
+        print(dataset.cat_ids)
     return dataset

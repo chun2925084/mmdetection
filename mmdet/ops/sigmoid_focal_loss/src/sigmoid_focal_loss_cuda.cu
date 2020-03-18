@@ -120,7 +120,7 @@ at::Tensor SigmoidFocalLoss_forward_cuda(const at::Tensor &logits,
 
   AT_DISPATCH_FLOATING_TYPES_AND_HALF(
       logits.scalar_type(), "SigmoidFocalLoss_forward", [&] {
-        SigmoidFocalLossForward<scalar_t><<<grid, block, 0, at::cuda::getCurrentCUDAStream()>>>(
+        SigmoidFocalLossForward<scalar_t><<<grid, block>>>(
             losses_size, logits.contiguous().data<scalar_t>(),
             targets.contiguous().data<int64_t>(), num_classes, gamma, alpha,
             num_samples, losses.data<scalar_t>());
@@ -159,7 +159,7 @@ at::Tensor SigmoidFocalLoss_backward_cuda(const at::Tensor &logits,
 
   AT_DISPATCH_FLOATING_TYPES_AND_HALF(
       logits.scalar_type(), "SigmoidFocalLoss_backward", [&] {
-        SigmoidFocalLossBackward<scalar_t><<<grid, block, 0, at::cuda::getCurrentCUDAStream()>>>(
+        SigmoidFocalLossBackward<scalar_t><<<grid, block>>>(
             d_logits_size, logits.contiguous().data<scalar_t>(),
             targets.contiguous().data<int64_t>(),
             d_losses.contiguous().data<scalar_t>(), num_classes, gamma, alpha,

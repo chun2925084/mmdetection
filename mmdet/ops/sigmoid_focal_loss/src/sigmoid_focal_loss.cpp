@@ -19,7 +19,6 @@ at::Tensor SigmoidFocalLoss_forward(const at::Tensor &logits,
                                     const int num_classes, const float gamma,
                                     const float alpha) {
   if (logits.type().is_cuda()) {
-    at::DeviceGuard guard(logits.device());
     return SigmoidFocalLoss_forward_cuda(logits, targets, num_classes, gamma,
                                          alpha);
   }
@@ -32,7 +31,6 @@ at::Tensor SigmoidFocalLoss_backward(const at::Tensor &logits,
                                      const int num_classes, const float gamma,
                                      const float alpha) {
   if (logits.type().is_cuda()) {
-    at::DeviceGuard guard(logits.device());
     return SigmoidFocalLoss_backward_cuda(logits, targets, d_losses,
                                           num_classes, gamma, alpha);
   }
