@@ -78,7 +78,7 @@ def coco_eval(result_files,
             table_data = [headers]
             table_data += [result for result in results_2d]
             table = AsciiTable(table_data)
-            print(table.table)
+            # print(table.table)
 
 
 def fast_eval_recall(results,
