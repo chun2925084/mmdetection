@@ -5,6 +5,7 @@ from collections import defaultdict
 import matplotlib.pyplot as plt
 import numpy as np
 import seaborn as sns
+import sys
 
 
 def cal_train_time(log_dicts, args):
@@ -80,9 +81,10 @@ def plot_curve(log_dicts, args):
                 plt.xlabel('iter')
                 plt.plot(
                     xs, ys, label=legend[i * num_metrics + j], linewidth=0.5)
-            plt.legend()
-        if args.title is not None:
-            plt.title(args.title)
+            # plt.legend()
+            plt.savefig(sys.argv[2].split("/")[1]+ ".jpg")
+        # if args.title is not None:
+            # plt.title(args.title)
     if args.out is None:
         plt.show()
     else:

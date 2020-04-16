@@ -54,6 +54,13 @@ python tools/test.py config/faster_rcnn_r50_fpn_1x.py work_dirs/faster_rcnn_r50_
 
 ```
 
+### Analyze
+
+```
+python tools/analyze_logs.py plot_curve work_dirs/model_name/.json --keys loss
+
+```
+
 ## License
 
 This project is released under the [Apache 2.0 license](LICENSE).
